@@ -23,7 +23,6 @@
 \usepackage{tabularx}
 \usepackage{ltablex}
 
-
 \usepackage{algorithm, algorithmicx, algpseudocode}
 
 \usepackage{cmap}
@@ -35,6 +34,7 @@
 \newcommand{\Z}{\mathbb{Z}}
 \newcommand*{\logequiv}{\ \Longleftrightarrow \ }
 \newcommand*\mean[1]{\overline{#1}}
+\renewcommand{\emptyset}{\varnothing}
 
 %\renewcommand{\arraystretch}{1.5}
 \linespread{1.3} % Полуторный интервал
@@ -45,41 +45,96 @@
 
 \usepackage{mathtools}
 
+\usepackage{enumitem}
+\AddEnumerateCounter{\asbuk}{\russian@alph}{щ}
+
+
+%% compressed enumerate and itemize <<
 \newenvironment{itemize*}%
 {\begin{itemize}%
-		\setlength{\itemsep}{0pt}%
-		\setlength{\parskip}{0pt}}%
-	{\end{itemize}}
+	\setlength{\itemsep}{0pt}%v
+	\setlength{\parskip}{0pt}}%
+{\end{itemize}}
 
 \newenvironment{enumerate*}%
 {\begin{enumerate}%
-		\setlength{\itemsep}{0pt}%
-		\setlength{\parskip}{0pt}}%
-	{\end{enumerate}}
+	\setlength{\itemsep}{0pt}%
+	\setlength{\parskip}{0pt}}%
+{\end{enumerate}}
+%% >>
+
+%% enumerate with russian numbering <<
+\newenvironment{alphaenumerate*}
+{\begin{enumerate}[label=(\asbuk*), ref=(\asbuk*)]
+	\setlength{\itemsep}{0pt}
+	\setlength{\parskip}{0pt}}
+{\end{enumerate}}
+%% >>
+
 
 \newcommand{\hrefl}[1] {\texttt{\href{#1}{#1}}}
+\newcommand{\children}[1] {\textsf{children}(#1)}
+
+%% use alternative math letters and symbols << 
 \renewcommand{\epsilon}{\varepsilon}
 \renewcommand{\phi}{\varphi}
+\let\smallcup\cup
+\let\smallcap\cap
+\renewcommand{\cup}{\bigcup}
+\renewcommand{\cap}{\bigcap}
+%% >>
+
+%% clear page before each section <<
+\let\oldsection\section
+\let\oldsubsection\subsection
+\renewcommand{\section}{\clearpage\oldsection}
+\renewcommand{\subsection}{\clearpage\oldsubsection}
+%% >>
+
+\usepackage{cases}
 
 \begin{document}
+
 
 % титульная страница
 \includepdf{title.pdf}
 
 % аннотация на русском
+\begin{center}
+	{\large Магистерская диссертация}
+	\vspace{0.2cm}
+	
+	\textbf{\Large Метод обобщения в таксономиях и его применение}
+	\vspace{0.4cm}
+	
+	{\large Власов А.С.}
+	
+\end{center}
+
 \thispagestyle{empty}
 \begin{abstract}
-	...
+В работе рассматривается недавно предложенный в группе Б.Г. Миркина метод "<наиболее экономного"> обобщения в таксономиях. Предлагается модификация метода, использующая критерий максимального правдоподобия. Формируется необходимое математическое обеспечение, включая программу графического вывода для визуализации результатов. Метод применяется для анализа структуры массива 26000 журнальных публикаций в области Науки о данных за последние 20 лет с использованием имеющейся таксономии Науки о данных.  Метод аннотированного суффиксного дерева применяется для формирования коэффициентов релевантности между публикациями и ключевыми словами (терминальными темами таксономии). По этой информации формируются нечеткие кластеры ключевых слов, которые затем обобщаются с использованием разработанного матобеспечения. Вычисление вероятностей возникновения и потери смыслов в вершинах таксономии производится на основе результатов, полученных на 20\% случайных подмножествах публикаций. Результаты вычислений свидетельствуют о том, что критерии наибольшей экономии и максимального правдоподобия совместимы. Полученные кластеры и их обобщения в целом подтверждают сделанные ранее выводы (на основе массива 18000 статей), но значительно их детализируют.
+
 \end{abstract}
 
 % аннотация на английском
+\clearpage
 \renewcommand{\abstractname}{Abstract}
+\begin{center}
+	{\large Master' thesis}
+	\vspace{0.2cm}
+	
+	\textbf{\Large Method for Appropriate Generalization in a Taxonomy}
+	\vspace{0.4cm}
+	
+	{\large Vlasov A.S.}
+	
+\end{center}
+
 \begin{abstract}
-	...
+	This project considers a recently proposed method for maximally parsimonious generalization of fuzzy sets in taxonomies. The method is modified to the maximum likelihood criterion. A software is developed to support the computation, including a program for graphic visualization. The method applies to a collection of 26000 research papers in Data Science published over the past 20 years, using a taxonomy of Data Science developed earlier.   The method of Annotated Suffix Tree applies to compute relevance indices between the papers and keywords (topics corresponding to terminal nodes of the taxonomy). This data is used to find fuzzy clusters of keywords - these clusters then are parsimoniously generalized with the developed software. Probabilities of emergence and loss of meanings in the taxonomy nodes are computed based on results obtained at 20\% random samples of papers. Our computational results show that the criteria of maximum parsimony and maximum likelihood are compatible. The found clusters and their generalizations broadly support earlier conclusions made over results of similar analyses of a Springer's collection of 18000 papers, bringing in much more detail.
 \end{abstract}
 \newpage
-
-
 
 % содержание (нумерация начинается здесь)
 \setcounter{page}{1}
@@ -89,12 +144,13 @@
 % ==============================================================================
 \section{Введение}
 % спостановка задач и объяснение того, что до меня никто это не делал
+...
 
 % ==============================================================================
 \section{Метод обобщения}
 
 % ------------------------------------------------------------------------------
-\subsection{Модель обобщения в таксономии}
+\oldsubsection{Модель обобщения в таксономии}
 
 С математической точки зрения таксономия --- это корневое дерево, вершины которого аннотированы различными понятиями (темами) предметной области. Рассмотрим следующую задачу. Дано нечеткое множество $S$, элементы которого являются листьями таксономии. Необходимо найти вершину более высокого уровня $t(S)$ (головное понятие, головная тема, head subject), которая как можно более плотно покрывает множество $S$. Подобная задача "<подъема"> --- это математически заданная модель способности человека к обобщению информации. При этом обобщаемые концепты заданы нечетким множеством на листьях таксономии.
 
@@ -149,10 +205,12 @@
 		\item $S_u\subseteq \cup_{h\in H}I(h)$ ($H$ покрывает $S_u$),
 		\item $\forall h, h' \in H: h\neq h' \implies I(h)\cap I(h') = \emptyset$ (множества листовых кластеров для любых вершин из $H$ не пересекаются).
 	\end{enumerate*}
-	\item $H-I$ --- множество \textit{головных понятий} (внутренних вершин $H$).
-	\item $H\cap I$ --- множество \textit{выбросов} (листовых вершин $H$).
-	\item $\cup_{h\in H-I}G(h) $  --- множество \textit{пробелов} (объединение множества $h$-пробелов для вершин из $H$).
+	\item $\textsf{heads}(H)=H-I$ --- множество \textit{головных понятий} (внутренних вершин $H$).
+	\item $\textsf{offshoots}(H) = H\cap I$ --- множество \textit{выбросов} (листовых вершин $H$).
+	\item $\textsf{gaps}(H) = \cup_{h\in H-I}G(h) $  --- множество \textit{пробелов} (объединение множества $h$-пробелов для вершин из $H$).
 \end{itemize*}
+
+В общем случае нечеткое множество $S$ определяет собой некоторую тему (понятие). Элементы этого множества соответствуют этому понятию, являются его подмножеством. Тогда, если вершина принадлежит множествам $\textsf{heads}(H)$ или $\textsf{offshoots}(H)$, то можно говорить о \textit{приобретении головного понятия}. Аналогично, если вершина принадлежит множеству $\textsf{gaps}(H)$, то говорят о \textit{потере головного понятия}.
 
 Со множеством $H$ необходимо ассоциировать некоторую функцию потерь, которая включает в себя штрафы за избыточное количество головных тем, выбросов и пробелов. Пусть:
 
@@ -164,31 +222,287 @@
 Величины штрафных коэффициентов задаются исследователем исходя из его экспертизы. 
 %%% пример выбора?
 
-Очевидно, что значение штрафа, ассоциированного с вершиной $h\in H$ должно учитывать значения функции принадлежности $u$ всех вершин листового кластера $I(h)$: чем они меньше, тем меньше штраф. По этой причине необходимо расширить область значений функции принадлежности $u$ на все вершины дерева.
-%%% способ расширения
-
-Кроме этого, несмотря на то, что все пробелы обладают значением принадлежности $u$, равным нулю, мы можем считать некоторые пробелы более критичными, чем другие. Для этого определим значение \textit{"<важности пробела">} $v(g)$ для того, чтобы использовать его в определении функции потерь. Интуитивно понятно, что чем меньше значение принадлежности родителя вершины-пробела, тем менее значим для нас пробел.
-
-Авторами \cite{mirkin2018preprint} предложено следующее формальное определение важности пробела:
+Очевидно, что значение штрафа, ассоциированного с вершиной $h\in H$ должно учитывать значения функции принадлежности $u$ всех вершин листового кластера $I(h)$: чем они меньше, тем меньше штраф. По этой причине необходимо расширить область значений функции принадлежности $u(\cdot)$ на все вершины дерева. Это может быть достигнуто с помощью некоторой аггрегирующей функции $f$:
 \begin{equation}
-	v(g)=u(\textsf{parent}(g)),
+	u(t) = f(\{u(i),i\in I(t)\}), \ t\in T-I.
+\end{equation}
+Для случая, когда значения функции принадлежности нормированы так, что сумма их квадратов равна единице ($\sum_{i\in S_u}u(i)^2=1$), предлагается следующая функция аггрегации:
+\begin{equation}
+	u(t) = \sqrt{\sum_{i\in I(t)}u(i)^2}, \quad  t\in T-I.
+	\label{eq:u_extend}
+\end{equation} %% TODO подумать почему?
+Мотивация использования такой функции аггрегации следующая. Значения функции принадлежности с квадратичной нормализацией можно рассматривать, как вклады индивидуальных элементов в общую "<массу"> кластера. Естественно предположить, что функция аггрегации так же должна наследовать это свойство так, чтобы вклад каждой из внутренних вершин был равен суммарному вкладу ее листового кластера. Выбранная функция аггрегации удовлетворяет этому условию.
+
+Кроме этого, несмотря на то, что все пробелы обладают значением принадлежности $u$, равным нулю, мы можем считать некоторые пробелы более критичными, чем другие. Для этого определим значение \textit{"<важности пробела">} $v(g)$ для того, чтобы использовать его в определении функции потерь. Интуитивно понятно, что чем меньше значение принадлежности родителя вершины-пробела, тем менее значим для нас пробел. Авторами \cite{mirkin2018preprint} предложено следующее формальное определение важности пробела:
+\begin{equation}
+	v(g)=u(\textsf{parent}(g)), \quad g\in T,
+	\label{eq:gap_importance}
 \end{equation}
 где $\textsf{parent}(g)$ --- вершина-родитель $g$.
 
-
+Исходя из всех данных выше определений и соображений в следующем разделе определим конкретную функцию потерь для данного множества $H$ и приведем алгоритм нахождения оптимального $H$, соответствующего минимуму этой функции.
 
 
 % ------------------------------------------------------------------------------
 \subsection{Критерий наибольшей экономии и метод}
+
+Исходя из принципа максимальной экономии (Maximum Parsimony), популярному в биоинформатике \cite{robinson2011introduction},моптимальное множество $H$ должно минимизировать количество элементов обобщения: головных понятий, выбросов и пробелов. Этот подход можно расширить, используя не количество элементов, а значения их функции принадлежности, взвешенные соответствующими штрафными коэффициентами. Авторами \cite{mirkin2018preprint} предложена следующая функция потерь для $u$-покрытия $H$, учитывающая это соображение:
+
+\begin{equation}
+	p(H)=\sum_{h\in \textsf{heads}(H)}u(h) + \sum_{h\in \textsf{heads}(H)}\sum_{g\in G(h)}\lambda v(g) + \sum_{h\in \textsf{offshoots}(H)}\gamma u(h).
+	\label{eq:pars_criterion}
+\end{equation}
+В предложенной функции потерь первое слагаемое --- штраф за введение новых головных понятий, второе --- штраф за пробелы, третье --- штраф за выбросы.
+
+Приведем алгоритм, разработанный в \cite{mirkin2018preprint}, позволяющий найти $H$, соответствующее глобальному минимуму критерия \eqref{eq:pars_criterion}. Для его работы необходимо подготовить дерево таксономии: удалить все не-максимальные $u$-нерелевантные вершины (потомки вершин-пропусков), каждой из вершин сопоставить множество пропусков $G(t)$ и суммарную важность пропусков:
+\begin{equation}
+	V(t)=\sum_{g\in G(t)}v(g).
+	\label{eq:sum_gap_importance}
+\end{equation}
+
+Далее будем считать, что дерево уже подготовлено и все его вершины аннотированы величинами $u(t), \ G(t), \ v(t), \ V(t)$. Для каждой вершины алгоритм ParGenFS рекурсивно (снизу вверх, начиная с листьев) вычисляет следующие величины:
+\begin{itemize*}
+	\item $H(t)$ --- вершины, в которых головное понятие было приобретено (головные вершины или выбросы);
+	\item $L(t)$ --- вершины, в которых головное понятие было потеряно (пропуски);
+	\item $p(t)$ --- величина штрафа, связанного с множеством $H(t)$.
+\end{itemize*}
+Предполагается, что в вершине \emph{не может} произойти приобретения понятия после того, как оно уже было потеряно в одном из предков данной вершины.
+
+В базовом случае, когда $t$ --- лист дерева:
+
+\begin{itemize*}
+	\item Если $t\notin S_u$, то $H(t)=\emptyset, \ L(t)=\emptyset,\ p(t)=0$;
+	\item Если $t\in S_u$, то $H(t)=\{t\}, \ L(t)=\emptyset,\ p(t)=\gamma u(t)$;
+\end{itemize*}
+
+Для того, чтобы вычислить $H(t)$ и $L(t)$ для любой из внутренних вершин, необходимо рассмотреть два случая:
+\begin{alphaenumerate*}
+	\item\label{enum:head_gained} Головное понятие было приобретено в $t$, тогда:
+	\begin{equation}
+		\begin{aligned}
+			H(t) &=\{t\},\\
+			L(t)&=G(t), \\
+			p(t)& = u(t) + \lambda V(t).
+		\end{aligned}
+	\end{equation}
+	\item Головное понятие \emph{не} было приобретено в $t$, тогда:
+	\begin{equation}
+		\begin{aligned}
+			H(t)=&\cup_{w\in \chi(t)} H(w),\\
+			L(t)=&\cup_{w\in \chi(t)} L(w), \\
+			p(t) =& \sum_{w\in \chi(t)}p(w).
+		\end{aligned}
+	\end{equation}
+\end{alphaenumerate*}
+
+Вершине присваивается тот набор параметров, в котором значение $p(t)$ меньше. В случае, если в обоих случаях значения $p(t)$ совпадают, берется любой из наборов, пусть это будет \ref{enum:head_gained}. В случае, если $t^*=\textsf{root}(T)$ --- корень дерева, то работа алгоритма закончена и возвращается результат: $H(t_*)$ --- множество головных понятий и выбросов, $L(t_*)$ --- множество пробелов и $p(t^*)$ --- значение штрафной функции. Алгоритм \ref{algo:pargenfs} формализует описанные шаги вычислений.
+
+\begin{algorithm}
+	\floatname{algorithm}{Алгоритм}
+	\caption{ParGenFS (Parsimonious Generalization of Fuzzy Sets)}\label{algo:pargenfs}
+	\vspace{5pt}
+	\textbf{Входные данные:} Подготовленное дерево $T$, вершины которого аннотированы величинами $u$, $G$, $v$, $V$.  \\
+	\textbf{Выходные данные:} $H, \ L, \ p$ 
+	
+	\newcommand{\child}{\textsf{w}}
+	\newcommand{\node}{\textsf{t}}
+	\begin{algorithmic}[1]
+		\For {$\node$ in $\textsf{ReverseLevelOrderTraversal}^\nabla(T)$}\vspace{2pt}
+			\If {$\node$ is leaf}
+				\If {$\node.u>0$}
+					\State $\node.H \gets \{\node\}$
+					\State $\node.L \gets \emptyset$
+					\State $\node.p \gets \gamma\cdot \node.u$	
+				\Else
+					\State $\node.H \gets \emptyset$
+					\State $\node.L \gets \emptyset$
+					\State $\node.p \gets 0$
+				\EndIf
+			\Else
+				\If {$\node.u + \lambda\cdot \node.V \leq \sum_{\child\in \chi(\node)}\child.p$}
+					\State $\node.H \gets \{\node\}$
+					\State $\node.L \gets \node.G$
+					\State $\node.p = \node.u + \lambda\cdot \node.V$
+				\Else
+					\State $\node.H \gets \cup_{\child\in \chi(\node)} \child.H$
+					\State $\node.L \gets \cup_{\child\in \chi(\node)} \child.L$
+					\State $\node.p = \sum_{\child\in \chi(\node)}\child.p$
+				\EndIf
+			\EndIf
+		\EndFor
+		\State \Return { $\textsf{root}(T).H, \ \textsf{root}(T).L, \textsf{root}(T).p$ }
+	\end{algorithmic}
+	{\footnotesize$~^\nabla$Обратный обход дерева в порядке уровней: начинают с листьев, затем переходят к вершинам на один уровень выше листьев, далее на два уровня и т.д.}
+\end{algorithm}
+
+Авторами \cite{mirkin2018preprint} доказано, что результатом работы алгоритма ParGenFS действительно является $u$-покрытие $H$, глобально минимизирующее функцию потерь \eqref{eq:pars_criterion}.
+
+В следующем разделе приведем модификацию экономичного метода обобщения, которая строит $u$-покрытие $H$ исходя из вероятности возникновения такого сценария, в котором потери и приобретения головных тем произошли в пробелах и в головных понятиях $H$ соответственно.
+
 % ------------------------------------------------------------------------------
 \subsection{Критерий максимального правдоподобия и метод}
 
+Для того, чтобы перейти от эвристического критерия наибольшей экономии \eqref{eq:pars_criterion} к более естественному критерию максимального правдоподобия, введем понятие \textit{сценария}, ассоциированного с произвольным $u$-покрытием $H$. Сценарий --- это множество событий $E$, ассоциированных с каждой из вершин дерева $T$. Каждой вершине соответствует ровно одно событие $e_t$. Сценарий для вершины $t\in T$ строится по следующим правилам:
 
+\begin{itemize*}
+	\item Если $t\in H$, тогда  в $t$ произошло приобретение головной темы (gain, G).
+	\item Если $t\in \textsf{gaps}(H)$, тогда в $t$ произошла потеря головной темы (loss, L).
+	\item Если $t\notin H \smallcup \textsf{gaps}(H)$, то в $t$ не произошло ни приобретения, ни потери головной темы, то считаем, что событий не произошло (pass, P).
+	\item В $t=\textsf{root}(T)$ произошла потеря головной темы.
+\end{itemize*}
+Таким образом, формальное определение сценария:
+
+\begin{equation}
+	Sc(H) = \{e_t(H),\forall t\in T\}, \quad e_t(H) \in \{G, L, P\}.
+\end{equation}
+
+Кроме этого, с каждой из вершин необходимо ассоциировать априорные вероятности приобретения ($p^G$) и потери ($p^L$) головной темы. Эти вероятности можно получить, построив обобщение множества нечетких кластеров и вычислив частотность событий для каждой вершины:
+
+\begin{equation}
+	\begin{gathered}
+		p_t^L = \frac{\#[\text{потерь в вершине }t]}{\#[\text{кластеров}]}, \\
+		p_t^G = \frac{\#[\text{приобретений в вершине }t]}{\#[\text{кластеров}]},
+	\end{gathered}
+	\label{eq:loss_gain_freq}
+\end{equation}
+где $\#[X]$ --- количество элементов во множестве $X$. Задача нахождения оптимального $u$-покрытия для данного дерева $H$ и нечеткого кластера $S$ c функцией принадлежности $u$ в данных терминах формулируется следующим образом:
+
+\begin{equation}
+	H = \arg\max_H p(Sc(H)).
+\end{equation}
+
+Количество возможных сценариев для дерева $T$ экспоненциально велико (порядка $3^n$, где $n$ --- число вершин дерева), поэтому решить эту оптимизационную задачу точно не представляется возможным. Для того, чтобы получить ее субоптимальное решение, используем рекурсивный алгоритм, который жадным образом строит наиболее вероятный сценарий. Рассмотрим два случая:
+\begin{enumerate*}
+	\item Вершина $t$ \emph{унаследовала} головное понятие от своего родителя, тогда возможны два события:
+	\begin{alphaenumerate*}
+		\item\label{enum:a} Потеря $L$ головного понятия в $t$. Вероятность этого равна $$p_t^L\prod_{w\in\children{t}}p_w^N,$$ где $p_w^N$ --- вероятность того, что $w$ \emph{не унаследовала} от $t$ головное понятие.
+		\item\label{enum:b} Потери не происходит (событие pass). Вероятность этого равна $$(1-p_t^L)\prod_{w\in\children{t}}p_w^I,$$ где $p_w^I$ --- вероятность того, что $w$ \emph{унаследовала} от $t$ головное понятие.
+	\end{alphaenumerate*}
+	В этом случае выбирается наиболее вероятное событие из \ref{enum:a} и \ref{enum:b} ($L$ или $P$), причем величина $p_t^I$ будет равна вероятности выбранного события.
+	\item Вершина $t$ \emph{не унаследовала} головное понятие от своего родителя, тогда возможны два события:
+	\begin{alphaenumerate*}
+		\item Приобретение $G$ головного понятия в $t$. Вероятность этого равна $$p_t^G \prod_{w\in\children{t}}p_w^I.$$
+		\item Приобретения не происходит. Вероятность этого равна $$(1-p_t^G) \prod_{w\in\children{t}}p_w^N.$$
+	\end{alphaenumerate*}
+	Во втором случае выбирается наиболее вероятное событие из ($G$ или $P$), причем величина $p_t^N$ будет равна его вероятности.
+\end{enumerate*}
+
+Для случая \emph{жестких кластеров} ($u\in\{0, 1\}$), случае, если $t$ --- листовая вершина:
+\begin{enumerate*}
+	\item Если $u_t = 1$, то $p_t^I=1-p_t^L, \ p_t^N=p_t^G$;
+	\item Если $u_t = 0$, то $p_t^I=p_t^L, \ p_t^N=1-p_t^G$.
+ \end{enumerate*}
+
+Введем обозначения:
+
+\newcommand{\ScIt}{Sc_t^I}
+\newcommand{\ScNt}{Sc_t^N}
+\newcommand{\ScIw}{Sc_w^I}
+\newcommand{\ScNw}{Sc_w^N}
+\begin{itemize*}
+	\item $\ScIt$ --- наиболее оптимальный сценарий для поддерева $T(t)$ при условии, что вершина $t$ \emph{унаследовала} головное понятие от своего родителя.
+	\item $\ScIt$ --- то же самое, но при условии, что вершина $t$ \emph{не унаследовала} головное понятие.
+\end{itemize*}
+
+ Итак, формально, для вершин рекурсивно вычисляются следующие величины:
+ \begin{itemize*}
+ 	\item Если $t$ --- внутренняя вершина:
+ 	
+ 	\newcommand{\pInhLost}{p_t^L\prod_{w\in\children{t}}p(\ScNw)}
+ 	\newcommand{\pInhPass}{(1-p_t^L)\prod_{w\in\children{t}}p(\ScIw)}
+ 	\newcommand{\pNotInhGain}{p_t^G\prod_{w\in\children{t}}p(\ScIw)}
+ 	\newcommand{\pNotInhPass}{(1-p_t^G)\prod_{w\in\children{t}}p(\ScNw)}
+ 	\begin{equation}
+	 	\begin{aligned}
+		 	\begin{aligned}
+		 	p(\ScIt) = \max\begin{cases}
+			 	\pInhLost, &\text{ (а)} \\
+			 	\pInhPass; &\text{ (б)}
+		 	\end{cases} \\
+		 	p(\ScNt) = \max\begin{cases}
+			 	\pNotInhGain, &\text{ (в)} \\
+			 	\pNotInhPass; &\text{ (г)}
+		 	\end{cases}
+	 	\end{aligned} \\
+	 	\begin{aligned}
+		 	\ScIt = \begin{cases}
+			 	\{L\}\smallcup \cup_{w\in\children{t}}\ScNw, &\text{ если (а)} \geq \text{(б)}, \\
+			 	\{P\}\smallcup \cup_{w\in\children{t}}\ScIw, &\text{ иначе};
+		 	\end{cases} \\
+		 	\ScNt = \begin{cases}
+			 	\{G\}\smallcup \cup_{w\in\children{t}}\ScIw, &\text{ если (в)} \geq \text{(г)}, \\
+			 	\{P\}\smallcup \cup_{w\in\children{t}}\ScNw, &\text{ иначе}.
+		 	\end{cases} \\
+		 	\end{aligned}
+		 	\end{aligned}
+		 	\label{eq:mals_recurs_p}
+ 	\end{equation}
+ 	
+ 	\item Если $t$ --- листовая вершина:
+ 	\begin{equation}
+ 		\begin{aligned}
+			p(\ScIt)&=\max\begin{cases}
+			1-p_t^L, &u_t=1, \\
+			p_t^L, &u_t=0;
+			\end{cases}  \quad
+			&p(\ScNt)&=\max\begin{cases}
+			p_t^G, &u_t=1, \\
+			1-p_t^G, &u_t=0;
+			\end{cases} \\
+			\ScIt&=\begin{cases}
+				\{P\}, &u_t=1, \\
+				\{L\}, &u_t=0;
+			\end{cases} \quad
+			&\ScNt&=\begin{cases}
+				\{G\}, &u_t=1, \\
+				\{P\}, &u_t=0.
+			\end{cases}
+		\end{aligned} 
+		\label{eq:mals_init_p}
+ 	\end{equation}
+
+ \end{itemize*}
+
+На практике при программной реализации алгоритма удобно в \eqref{eq:mals_init_p}, \eqref{eq:mals_recurs_p} логарифмировать выражения для $p(\cdot)$, чтобы заменить операцию умножения на сложение. Алгоритм \ref{algo:malgenfs} формализует все вышесказанное.
+
+После применения алгоритма  \ref{algo:malgenfs} к множеству кластеров, частоты приобретений и потерь, использованные в  \eqref{eq:loss_gain_freq} могут измениться. Это можно интерпретировать, как разницу между априорным и апостериорным распределением событий в вершинах. На апостериорном распределении может быт итеративно запущен алгоритм MaLGenFS до тех пор, пока вероятности событий не перестанут изменяться. Доказательства того, что итеративный MalGenFS всегда сходится, нет, но в экспериментах авторов \cite{mirkin2006aggregating}, проведенных на геномных данных алгоритм всегда сходился.
+
+
+\begin{algorithm}
+	\floatname{algorithm}{Алгоритм}
+	\caption{MaLGenFS (Maximul Likelihood Generalization of Fuzzy Sets)}\label{algo:malgenfs}
+	\vspace{5pt}
+	\textbf{Входные данные:} Подготовленное дерево $T$, вершины которого аннотированы величинами $p^G$, $p^L$ и $u$ (последнее только у листьев).  \\
+	\textbf{Выходные данные:} $Sc$
+	
+	\newcommand{\child}{\textsf{w}}
+	\newcommand{\node}{\textsf{t}}
+	\begin{algorithmic}[1]
+		\For {$\node$ in $\textsf{ReverseLevelOrderTraversal}(T)$}\vspace{2pt}
+			\If {$\node$ is leaf}
+				\State $\node.logPrI \gets \log{p(\ScIt)}$ \Comment{ из ур. \eqref{eq:mals_init_p}}
+				\State $\node.logPrN \gets \log{p(\ScNt)}$ 
+				\State $\node.ScI \gets \ScIt$ 
+				\State $\node.ScN \gets \ScNt$ 
+			\Else
+				\State $\node.logPrI \gets \log{p(\ScIt)}$ \Comment{ из ур. \eqref{eq:mals_recurs_p}}
+				\State $\node.logPrN \gets \log{p(\ScNt)}$ 
+				\State $\node.ScI \gets \ScIt$ 
+				\State $\node.ScN \gets \ScNt$ 
+			\EndIf
+		\EndFor
+		\State \Return { $\textsf{root}(T).ScN$ }
+	\end{algorithmic}
+\end{algorithm}
+
+В этом и предыдущем разделах были приведены формальные постановки задачи обобщения нечеткого множества, заданного на листьях таксономии и отвечающего некоторому набору тем --- вершин более высокого уровня, описывающему его. В следующем разделе описанные алгоритмы будут применены к анализу тенденций в развитии науки о данных. Исходными данными будет являться коллекция аннотаций к научным статьям, с помощью которых будет построена матрица корелевантности листовых вершин таксономии наук о данных и найдены нечеткие кластеры.
+
+ 
 % ==============================================================================
 \section{Применение к анализу тенденций в области науки о данных}
 
 % ------------------------------------------------------------------------------
-\subsection{Подготовка коллекции текстов}
+\oldsubsection{Подготовка коллекции текстов}
 \label{section:text-data}
 
 В качестве исходных данных были использована коллекция из 68 933 аннотаций научных статей вместе с ключевыми словами, названием журнала и датой публикации. Коллекция доступна для скачивания на сайте научно-учебной группы "<Концепт"> \cite{concept_datasets}.
@@ -531,21 +845,33 @@ C учетом вышесказанного, таблица корелевант
 Разработка велась на языке Python версии 3.6.8. Коды программ доступны в репозитории на GitHub. %%%% TODO
 Расчеты проводились на личном ноутбуке с процессором Intel Core-i5 и 8 ГБ RAM, а так же на доступных автору вычислительным мощностям (сервер DELL R640).
 
+%%%%%%% TODO
+\subsubsection{Подготовка данных}
+\subsubsection{Формирование кластеров}
+\subsubsection{Обобщение кластеров}
+\subsubsection{Графика и визуализация}
+
 % ------------------------------------------------------------------------------
 \subsection{Результаты расчетов и выводы}
 
 % ==============================================================================
 \section{Заключение}
 
+...
 
+...
+
+\noindent\textbf{Благодарности}
+
+Автор благодарит своего научного руководителя Миркина Бориса Григорьевича за поддержку, мотивацию и переданные знания, Фролова Дмитрия Сергеевича и других участников НУГ "<Концепт"> за помощь с разработкой программ для визуализации, а так же Международную научно-учебную лабораторию анализа и выбора решений НИУ ВШЭ и Научный фонд ВШЭ за содействие исследованиям в рамках гранта НУГ 19-04-019 "<Разработка методов структуризации и концептуализации текстовых данных на основе таксономии предметной области">.
 % ==============================================================================
-
+\clearpage
 \nocite{*}
 \bibliographystyle{ugost2008mod} 
 \bibliography{bibliography}
 
 % ==============================================================================
-\appendix
+\clearpage\appendix
 
 \section{Список журналов в коллекции}
 \label{appendix:journals}
